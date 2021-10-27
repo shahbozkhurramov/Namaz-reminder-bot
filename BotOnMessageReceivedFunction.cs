@@ -14,16 +14,19 @@ namespace bot
 {
     public partial class Handlers
     {
-         private async Task BotOnMessageReceived(ITelegramBotClient client, Message message)
+        private string temp;
+        private string _language="English";
+        private async Task BotOnMessageReceived(ITelegramBotClient client, Message message)
         {
+            Console.WriteLine($"@{message.From.Username} --> {message.From.FirstName} {message.From.LastName}");
             if(message.Location != null)
             {
                 await _cache.GetOrUpdatePrayerTimeAsync(message.Chat.Id, message.Location.Longitude, message.Location.Latitude);
                 await client.SendTextMessageAsync(
                     message.Chat.Id,
-                    "Location successfully accepted\nNow you can get your timezone prayertime",
+                    text: Function.LocationAccepted(_language),
                     replyToMessageId: message.MessageId,
-                    replyMarkup: MessageBuilder.MenuShow()
+                    replyMarkup: MessageBuilder.MenuShow(_language)
                 );
                 _longitude = message.Location.Longitude;
                 _latitude = message.Location.Latitude;
@@ -41,11 +44,10 @@ namespace bot
                     await _storage.InsertUserAsync(user);
                 }
                 else{ 
-                    _logger.LogInformation($"User already exists!");
                     await _storage.UpdateUserAsync(user);
+                    _logger.LogInformation($"User already exists!");
                 }
                 Console.WriteLine($"{_latitude} {_longitude}");
-                Console.WriteLine($"@{message.From.Username} --> {message.From.FirstName} {message.From.LastName}");
             }
             else
             { 
@@ -53,67 +55,74 @@ namespace bot
                 if(message.Text=="/start"){
                     await client.SendTextMessageAsync(
                     chatId: message.Chat.Id,
-                    text: "Welcome to our Prayer Time bot\nIn order to get Namaz times please share your Location...",
+                    text: "Choose Language\nTilni tanlang\nВыберите язык",
                     parseMode: ParseMode.Markdown,
-                    replyMarkup: MessageBuilder.LocationRequestButton());
-                    Console.WriteLine($"@{message.From.Username} --> {message.From.FirstName} {message.From.LastName}");}
-                else if(message.Text=="Change Location") await client.SendTextMessageAsync(
-                    chatId: message.Chat.Id,
-                    text: "Change Location",
-                    parseMode: ParseMode.Markdown,
-                    replyMarkup: MessageBuilder.LocationRequestButton());
-                else if(message.Text=="Settings") await client.SendTextMessageAsync(
-                            chatId: message.Chat.Id,
-                            text: "Settings",
-                            parseMode: ParseMode.Markdown,
-                            replyMarkup: MessageBuilder.SettingsProperty());
-                else if(message.Text=="Back to menu")
-                            await client.SendTextMessageAsync(
-                            chatId: message.Chat.Id,
-                            text: "Menu",
-                            parseMode: ParseMode.Markdown,
-                            replyMarkup: MessageBuilder.MenuShow());         
-                else if(message.Text=="Cancel")
-                            await client.SendTextMessageAsync(
-                            chatId: message.Chat.Id,
-                            text:"Cancel",
-                            parseMode: ParseMode.Markdown,
-                            replyMarkup: MessageBuilder.MenuShow());
-                else if(message.Text=="Today")
-                {
-                    if(await _storage.ExistsAsync(message.Chat.Id))
-                    {
-                        var res = await _storage.GetUserAsync(message.Chat.Id);
-                        var result = await _cache.GetOrUpdatePrayerTimeAsync(res.ChatId, res.Longitude, res.Latitude);
-                        var times = result.prayerTime;
+                    replyMarkup: MessageBuilder.LanguageRequestButton());
+                }
+                else if((message.Text=="English" || message.Text=="O'zbekcha" || message.Text=="Русский") && temp=="/start"){
                     await client.SendTextMessageAsync(
                     chatId: message.Chat.Id,
-                    text: @$"
-*Fajr*: {times.Fajr}
-*Sunrise*: {times.Sunrise}
-*Dhuhr*: {times.Dhuhr}
-*Asr*: {times.Asr}
-*Maghrib*: {times.Maghrib}
-*Isha*: {times.Isha}
-*Midnight*: {times.Midnight}
-                    
-*Method*: {times.CalculationMethod}
-                    ",
+                    text: Function.Welcome(_language),
                     parseMode: ParseMode.Markdown,
-                    replyMarkup: MessageBuilder.MenuShow());
-                    }
-                    else{
-                         await client.SendTextMessageAsync(
-                    chatId: message.Chat.Id,
-                    text: "In order to get Namaz times please share your Location...",
-                    parseMode: ParseMode.Markdown,
-                    replyMarkup: MessageBuilder.LocationRequestButton());
-                    }
-
+                    replyMarkup: MessageBuilder.LocationRequestButton(message.Text)); 
+                    _language=message.Text;
                 }
-                else await client.SendTextMessageAsync(
-                            chatId: message.Chat.Id,
-                            text: "Error occured!\nPlease try again.");
+                else if(message.Text=="English" || message.Text=="O'zbekcha" || message.Text=="Русский")
+                {
+                    await client.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    text: message.Text,
+                    parseMode: ParseMode.Markdown,
+                    replyMarkup: MessageBuilder.SettingsProperty(message.Text)); 
+                    _language=message.Text;
+                }
+                else if(message.Text=="Change Location" || message.Text=="Manzilni o'zgartirish" || message.Text=="Изменить локацию") 
+                    await client.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    text: message.Text,
+                    parseMode: ParseMode.Markdown,
+                    replyMarkup: MessageBuilder.LocationRequestButton(_language));
+                else if(message.Text=="Settings" || message.Text=="Sozlamalar" || message.Text=="Настройки") 
+                    await client.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    text: message.Text,
+                    parseMode: ParseMode.Markdown,
+                    replyMarkup: MessageBuilder.SettingsProperty(_language));
+                else if(message.Text=="Back to menu" || message.Text=="Menyuga qaytish" || message.Text=="В Меню")
+                    await client.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    text: message.Text,
+                    parseMode: ParseMode.Markdown,
+                    replyMarkup: MessageBuilder.MenuShow(_language));         
+                else if((message.Text=="Cancel" || message.Text=="Orqaga" || message.Text=="Отмена") && (temp=="English" || temp=="O'zbekcha" || message.Text=="Русский"))
+                    await client.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    text:message.Text,
+                    parseMode: ParseMode.Markdown,
+                    replyMarkup: MessageBuilder.MenuShow(_language));
+                else if(message.Text=="Cancel" || message.Text=="Orqaga" || message.Text=="Отмена") 
+                    await client.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    text:message.Text,
+                    parseMode: ParseMode.Markdown,
+                    replyMarkup: MessageBuilder.SettingsProperty(_language));
+                else if(message.Text=="Change Language" || message.Text=="Tilni o'zgartirish" || message.Text=="Изменить язык")
+                {
+                    await client.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    text: message.Text,
+                    parseMode: ParseMode.Markdown,
+                    replyMarkup: MessageBuilder.LanguageRequestButton());
+                }
+                else if(message.Text=="Today" || message.Text=="Bugun" || message.Text=="Сегодня")
+                {
+                    Function.TimesWriter(client,message, _language, _storage, _cache);
+                }
+                else 
+                    await client.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    text: Function.ErrorOccured(_language));
+                temp=message.Text;
             }
         }
     }

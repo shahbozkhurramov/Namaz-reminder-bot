@@ -12,7 +12,6 @@ namespace bot.Entity
         public double Longitude { get; set; }
         public double Latitude { get; set; }
         public string Address { get; set; }
-
         [Obsolete("Used only for Entity binding.")]
         public BotUser(){ }
 

@@ -60,6 +60,21 @@ namespace bot.Services
         {
             try
             {
+                var savedUser = await GetUserAsync(user.ChatId);
+                 _context.Users.Remove(savedUser);
+                 _context.Users.AddAsync(user);
+                await _context.SaveChangesAsync();
+                return (true, null);
+            }
+            catch(Exception e)
+            {
+                return (false, e);
+            }
+        }
+        public async Task<(bool IsSuccess, Exception exception)> UpdateLanguageAsync(BotUser user)
+        {
+            try
+            {
                 _context.Users.Update(user);
                 await _context.SaveChangesAsync();
 
@@ -70,5 +85,6 @@ namespace bot.Services
                 return (false, e);
             }
         }
+        
     }
 }
