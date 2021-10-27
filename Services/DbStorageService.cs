@@ -61,8 +61,8 @@ namespace bot.Services
             try
             {
                 var savedUser = await GetUserAsync(user.ChatId);
-                 _context.Users.Remove(savedUser);
-                 _context.Users.AddAsync(user);
+                _context.Users.Remove(savedUser);
+                await _context.Users.AddAsync(user);
                 await _context.SaveChangesAsync();
                 return (true, null);
             }
