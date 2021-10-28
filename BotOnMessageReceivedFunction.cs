@@ -18,27 +18,25 @@ namespace bot
         private string _language;
         private async Task BotOnMessageReceived(ITelegramBotClient client, Message message)
         {
-            var user=await _storage.GetUserAsync(message.Chat.Id);
-            _language = user.Address;
-            Console.WriteLine(_language);
             Console.WriteLine($"@{message.From.Username} --> {message.From.FirstName} {message.From.LastName}");
-            if(message.Location != null)
+            if(message.Location!=null)
             {
                 await ElseIf.NullLocation( client,  message,  _language,  _storage, _cache, _longitude, _latitude,_logger);
             }
             else
-            { 
+            {
+                _language=Language.LanguageCheck(message.Text);
                 Console.WriteLine($"{message.Text}");
                 if(message.Text=="/start"){
-                    await client.SendTextMessageAsync(
-                    chatId: message.Chat.Id,
-                    text: "Choose Language\nTilni tanlang\nВыберите язык",
-                    parseMode: ParseMode.Markdown,
-                    replyMarkup: MessageBuilder.LanguageRequestButton());
+                        await client.SendTextMessageAsync(
+                        chatId: message.Chat.Id,
+                        text: "Choose Language\nTilni tanlang\nВыберите язык",
+                        parseMode: ParseMode.Markdown,
+                        replyMarkup: MessageBuilder.LanguageRequestButton());
+                        ElseIf.ChangeUser(client,  message,  _language,  _storage, _cache, _longitude, _latitude,_logger);
                 }
                 else if((message.Text=="English" || message.Text=="O'zbekcha" || message.Text=="Русский") && temp=="/start"){
                     _language=message.Text;
-                    ElseIf.ChangeLanguage(client,  message,  _language,  _storage, _cache, _longitude, _latitude,_logger);
                     await client.SendTextMessageAsync(
                     chatId: message.Chat.Id,
                     text: Helpers.Welcome(_language),
@@ -48,7 +46,6 @@ namespace bot
                 else if(message.Text=="English" || message.Text=="O'zbekcha" || message.Text=="Русский")
                 {
                     _language=message.Text;
-                    ElseIf.ChangeLanguage(client,  message,  _language,  _storage, _cache, _longitude, _latitude,_logger);
                     await client.SendTextMessageAsync(
                     chatId: message.Chat.Id,
                     text: message.Text,
@@ -56,35 +53,45 @@ namespace bot
                     replyMarkup: MessageBuilder.SettingsProperty(message.Text)); 
                 }
                 else if(message.Text=="Change Location" || message.Text=="Manzilni o'zgartirish" || message.Text=="Изменить локацию") 
+                {
                     await client.SendTextMessageAsync(
                     chatId: message.Chat.Id,
                     text: message.Text,
                     parseMode: ParseMode.Markdown,
                     replyMarkup: MessageBuilder.LocationRequestButton(_language));
+                }
                 else if(message.Text=="Settings" || message.Text=="Sozlamalar" || message.Text=="Настройки") 
+                {
                     await client.SendTextMessageAsync(
                     chatId: message.Chat.Id,
                     text: message.Text,
                     parseMode: ParseMode.Markdown,
                     replyMarkup: MessageBuilder.SettingsProperty(_language));
+                }
                 else if(message.Text=="Back to menu" || message.Text=="Menyuga qaytish" || message.Text=="В Меню")
+                {
                     await client.SendTextMessageAsync(
                     chatId: message.Chat.Id,
                     text: message.Text,
                     parseMode: ParseMode.Markdown,
-                    replyMarkup: MessageBuilder.MenuShow(_language));         
+                    replyMarkup: MessageBuilder.MenuShow(_language)); 
+                }        
                 else if((message.Text=="Cancel" || message.Text=="Orqaga" || message.Text=="Отмена") && (temp=="English" || temp=="O'zbekcha" || temp=="Русский"))
+                {
                     await client.SendTextMessageAsync(
                     chatId: message.Chat.Id,
                     text:message.Text,
                     parseMode: ParseMode.Markdown,
                     replyMarkup: MessageBuilder.MenuShow(_language));
+                }
                 else if(message.Text=="Cancel" || message.Text=="Orqaga" || message.Text=="Отмена") 
+                {
                     await client.SendTextMessageAsync(
                     chatId: message.Chat.Id,
                     text:message.Text,
                     parseMode: ParseMode.Markdown,
                     replyMarkup: MessageBuilder.SettingsProperty(_language));
+                }
                 else if(message.Text=="Change Language" || message.Text=="Tilni o'zgartirish" || message.Text=="Изменить язык")
                 {
                     await client.SendTextMessageAsync(
@@ -105,10 +112,12 @@ namespace bot
                     parseMode: ParseMode.Markdown,
                     replyMarkup: MessageBuilder.MenuShow(_language));
                 }
-                else 
+                else
+                {
                     await client.SendTextMessageAsync(
                     chatId: message.Chat.Id,
                     text: Helpers.ErrorOccured(_language));
+                }
                 temp=message.Text;
             }
         }

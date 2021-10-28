@@ -18,7 +18,8 @@ namespace bot
         {
             if(language=="English") return "Error occured!\nPlease try again.";
             else if(language=="O'zbekcha") return "Xatolik yuz berdi!\nBoshqatdan urinib ko'ring.";
-            return "Произошла ошибка!\nПожалуйста попробуйте ещё раз.";
+            else if(language=="Русский") return "Произошла ошибка!\nПожалуйста попробуйте ещё раз.";
+            return "404";
         }
         public static string Welcome(string language)
         {

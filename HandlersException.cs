@@ -39,7 +39,7 @@ namespace bot
             };
             try{
                 await handler;
-            }catch{ throw new Exception();}
+            }catch{ }
         }
 
         private async Task BotOnMessageEdited(ITelegramBotClient client, Message editedMessage)
