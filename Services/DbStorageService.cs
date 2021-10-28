@@ -27,7 +27,6 @@ namespace bot.Services
         public async Task<BotUser> GetUserAsync(string username)
             => await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
 
-
         public async Task<(bool IsSuccess, Exception exception)> InsertUserAsync(BotUser user)
         {
             try
@@ -62,6 +61,7 @@ namespace bot.Services
             {
                 var savedUser = await GetUserAsync(user.ChatId);
                 _context.Users.Remove(savedUser);
+                await _context.SaveChangesAsync();
                 await _context.Users.AddAsync(user);
                 await _context.SaveChangesAsync();
                 return (true, null);

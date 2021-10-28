@@ -16,16 +16,19 @@ namespace bot
     {
         private string temp;
         private string _language;
+        private string templan;
         private async Task BotOnMessageReceived(ITelegramBotClient client, Message message)
         {
             Console.WriteLine($"@{message.From.Username} --> {message.From.FirstName} {message.From.LastName}");
             if(message.Location!=null)
             {
-                await ElseIf.NullLocation( client,  message,  _language,  _storage, _cache, _longitude, _latitude,_logger);
+                _language=templan;
+                await ElseIf.NullLocation( client,  message,  _language,  _storage, _cache,_logger);
             }
             else
             {
-                _language=Language.LanguageCheck(message.Text);
+                _language = Language.LanguageCheck(message.Text);
+                templan = _language;
                 Console.WriteLine($"{message.Text}");
                 if(message.Text=="/start"){
                         await client.SendTextMessageAsync(
@@ -33,7 +36,6 @@ namespace bot
                         text: "Choose Language\nTilni tanlang\nВыберите язык",
                         parseMode: ParseMode.Markdown,
                         replyMarkup: MessageBuilder.LanguageRequestButton());
-                        ElseIf.ChangeUser(client,  message,  _language,  _storage, _cache, _longitude, _latitude,_logger);
                 }
                 else if((message.Text=="English" || message.Text=="O'zbekcha" || message.Text=="Русский") && temp=="/start"){
                     _language=message.Text;
@@ -43,7 +45,7 @@ namespace bot
                     parseMode: ParseMode.Markdown,
                     replyMarkup: MessageBuilder.LocationRequestButton(message.Text)); 
                 }
-                else if(message.Text=="English" || message.Text=="O'zbekcha" || message.Text=="Русский")
+                else if((message.Text=="English" || message.Text=="O'zbekcha" || message.Text=="Русский") && temp!="/start")
                 {
                     _language=message.Text;
                     await client.SendTextMessageAsync(

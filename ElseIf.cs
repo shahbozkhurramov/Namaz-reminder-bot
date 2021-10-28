@@ -14,7 +14,7 @@ namespace bot
 {
     public class ElseIf
     {
-        public static async Task NullLocation(ITelegramBotClient client, Message message, string _language, IStorageService _storage,ICacheService _cache,float _longitude,float _latitude,ILogger<Handlers> _logger)
+        public static async Task NullLocation(ITelegramBotClient client, Message message, string _language, IStorageService _storage,ICacheService _cache,ILogger<Handlers> _logger)
         {
             await _cache.GetOrUpdatePrayerTimeAsync(message.Chat.Id, message.Location.Longitude, message.Location.Latitude);
             await client.SendTextMessageAsync(
@@ -24,11 +24,31 @@ namespace bot
                 replyMarkup: MessageBuilder.MenuShow(_language)
             );
 
-            _longitude = message.Location.Longitude;
-            _latitude = message.Location.Latitude;
-            
-            ChangeUser(client,  message,  _language,  _storage, _cache, _longitude, _latitude,_logger);
-            Console.WriteLine($"{_latitude} {_longitude}");
+            float _longitude = message.Location.Longitude;
+            float _latitude = message.Location.Latitude;
+
+            var user = await _storage.GetUserAsync(message.Chat.Id);
+            if(user is null)
+            {
+                user = new BotUser(
+                    chatId: message.Chat.Id,
+                    username: message.From.Username,
+                    fullname: $"{message.From.FirstName} {message.From.LastName}",
+                    longitude: _longitude,
+                    latitude: _latitude,
+                    address: "");
+                
+                await _storage.InsertUserAsync(user);
+                _logger.LogInformation($"New user added: {message.Chat.Id}");
+            }
+            else
+            {
+                user.Longitude = _longitude;
+                user.Latitude = _latitude;
+
+                await _storage.UpdateUserAsync(user);
+                _logger.LogInformation($"User {user.ChatId} updated!");
+            }
         }
         public static async Task ChangeUser(ITelegramBotClient client, Message message, string _language, IStorageService _storage,ICacheService _cache,float _longitude,float _latitude,ILogger<Handlers> _logger)
         {
@@ -38,7 +58,7 @@ namespace bot
             fullname: $"{message.From.FirstName} {message.From.LastName}",
             longitude: _longitude,
             latitude: _latitude,
-            address: _language);
+            address: "");
 
             var result=await _storage.InsertUserAsync(user1);
             
