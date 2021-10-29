@@ -16,18 +16,19 @@ namespace bot
     {
         public static async Task NullLocation(ITelegramBotClient client, Message message, string _language, IStorageService _storage,ICacheService _cache,ILogger<Handlers> _logger)
         {
+            var user = await _storage.GetUserAsync(message.Chat.Id);
+            user.Address =_language;
+            await _storage.UpdateUserAsync(user);
             await _cache.GetOrUpdatePrayerTimeAsync(message.Chat.Id, message.Location.Longitude, message.Location.Latitude);
             await client.SendTextMessageAsync(
                 message.Chat.Id,
-                text: Helpers.LocationAccepted(_language),
+                text: Helpers.LocationAccepted(user.Address),
                 replyToMessageId: message.MessageId,
-                replyMarkup: MessageBuilder.MenuShow(_language)
+                replyMarkup: MessageBuilder.MenuShow(user.Address)
             );
 
             float _longitude = message.Location.Longitude;
             float _latitude = message.Location.Latitude;
-
-            var user = await _storage.GetUserAsync(message.Chat.Id);
             if(user is null)
             {
                 user = new BotUser(
@@ -36,7 +37,7 @@ namespace bot
                     fullname: $"{message.From.FirstName} {message.From.LastName}",
                     longitude: _longitude,
                     latitude: _latitude,
-                    address: "");
+                    address: _language);
                 
                 await _storage.InsertUserAsync(user);
                 _logger.LogInformation($"New user added: {message.Chat.Id}");
@@ -45,34 +46,10 @@ namespace bot
             {
                 user.Longitude = _longitude;
                 user.Latitude = _latitude;
-
+                user.Address =_language;
                 await _storage.UpdateUserAsync(user);
                 _logger.LogInformation($"User {user.ChatId} updated!");
             }
         }
-        public static async Task ChangeUser(ITelegramBotClient client, Message message, string _language, IStorageService _storage,ICacheService _cache,float _longitude,float _latitude,ILogger<Handlers> _logger)
-        {
-            var user1 = new BotUser(
-            chatId: message.Chat.Id,
-            username: message.From.Username,
-            fullname: $"{message.From.FirstName} {message.From.LastName}",
-            longitude: _longitude,
-            latitude: _latitude,
-            address: "");
-
-            var result=await _storage.InsertUserAsync(user1);
-            
-            if(result.IsSuccess)
-            {
-                _logger.LogInformation($"New user added: {message.Chat.Id}");
-                await _storage.InsertUserAsync(user1);
-            }
-            else
-            { 
-                await _storage.UpdateUserAsync(user1);
-                _logger.LogInformation($"User already exists!");
-            }
-        }
-
     }
 }

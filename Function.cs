@@ -22,7 +22,6 @@ namespace bot
                     {
                         var res = await _storage.GetUserAsync(message.Chat.Id);
                         var result = await _cache.GetOrUpdatePrayerTimeAsync(res.ChatId, res.Longitude, res.Latitude);
-                        Console.WriteLine(res.Longitude+" "+res.Latitude);
                         var times = result.prayerTime;
                     await client.SendTextMessageAsync(
                     chatId: message.Chat.Id,

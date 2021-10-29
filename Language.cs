@@ -14,29 +14,29 @@ using System.Collections;
 using System.Collections.Generic;
 namespace bot
 {
-    public class Language
+    public class Languages
     {
-        private static List<string> Uzbek=new List<string>(){"Ulashish", "Orqaga", "Bugun", "Ertangi", 
-        "Sozlamalar", "Tilni o'zgartirish", "Manzilni o'zgartirish", "Menyuga qaytish", "O'zbekcha"};
-        private static List<string> English=new List<string>(){"Share", "Cancel", "Today", "Tomorrow", 
-        "Settings", "Changa Language", "Change Location", "Back to menu", "English"};
-        private static List<string> Russian=new List<string>(){"Изменить язык", "Поделиться", "Отмена", "Сегодня", "Завтра", 
-        "Настройки", "Изменить локацию", "В Меню","Русский"};
-        public static string LanguageCheck(string message)
+        public static string[,] Language = new string[3,8]{
+                {"Ulashish", "Bugun", "Ertangi", 
+                "Sozlamalar", "Tilni o'zgartirish", "Manzilni o'zgartirish", "Menyuga qaytish", "O'zbekcha"},
+                
+                {"Share", "Today", "Tomorrow", 
+                "Settings", "Change Language", "Change Location", "Back to menu", "English"},
+
+                {"Поделиться", "Сегодня", "Завтра", 
+                "Настройки","Изменить язык",  "Изменить локацию", "В Меню","Русский"}
+            };
+        public static int CheckLanguage(string language)
         {
-            if(English.Contains(message))
+            if(language=="O'zbekcha")
             {
-                return "English";
+                return 0;
             }
-            else if(Uzbek.Contains(message))
+            else if(language=="Русский")
             {
-                return "O'zbekcha";
+                return 2;
             }
-            else if(Russian.Contains(message))
-            { 
-                return "Русский";
-            }
-            else return "error";
+            return 1;
         }
     }
 }

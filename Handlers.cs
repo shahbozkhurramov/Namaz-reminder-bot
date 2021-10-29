@@ -18,8 +18,8 @@ namespace bot
         private readonly ILogger<Handlers> _logger;
         private readonly IStorageService _storage;
         private readonly ICacheService _cache;
-        private static float _longitude;
-        private static float _latitude;
+        // private static float _longitude;
+        // private static float _latitude;
 
         public Handlers(
             ILogger<Handlers> logger, 
