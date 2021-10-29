@@ -34,5 +34,21 @@ namespace bot.Services
                 return result;
             });
         }
+        public async Task<(bool IsSuccess, PrayerTime prayerTime, Exception exception)> GetOrUpdatePrayerTimeAsyncTomorrow(long chatId, double longitude, double latitude)
+        {
+            var key = string.Format($"{chatId}:{longitude}:{latitude}");
+
+            return await _memCache.GetOrCreateAsync(key, async entry => 
+            {   
+                var result = await _client.GetPrayerTimeAsyncTomorrow(longitude, latitude);
+                var zone = result.prayerTime.Timezone;
+                var zoneId = TimeZoneInfo.FindSystemTimeZoneById(zone);
+
+                var expirationTime = TimeZoneInfo.ConvertTimeToUtc(DateTime.Parse("23:59:59"), zoneId);
+                entry.AbsoluteExpiration = expirationTime;
+                
+                return result;
+            });
+        }
     }
 }

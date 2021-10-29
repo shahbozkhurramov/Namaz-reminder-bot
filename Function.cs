@@ -16,16 +16,13 @@ namespace bot
     {
         public static async void TimesWriter(ITelegramBotClient client, Message message, string _language, IStorageService _storage, ICacheService _cache)
         {
-            if(_language=="English" || _language=="O'zbekcha" || _language=="Русский")
-            {
-                if(await _storage.ExistsAsync(message.Chat.Id))
-                    {
-                        var res = await _storage.GetUserAsync(message.Chat.Id);
-                        var result = await _cache.GetOrUpdatePrayerTimeAsync(res.ChatId, res.Longitude, res.Latitude);
-                        var times = result.prayerTime;
-                    await client.SendTextMessageAsync(
-                    chatId: message.Chat.Id,
-                    text: @$"
+            var res = await _storage.GetUserAsync(message.Chat.Id);
+            var result = await _cache.GetOrUpdatePrayerTimeAsync(res.ChatId, res.Longitude, res.Latitude);
+            var times = result.prayerTime; 
+                await client.SendTextMessageAsync(
+                chatId: message.Chat.Id,
+                text: @$"
+                {AladhanClient.GetDateToday(res.Longitude, res.Latitude)}
 *Fajr*: {times.Fajr}
 *Sunrise*: {times.Sunrise}
 *Dhuhr*: {times.Dhuhr}
@@ -38,15 +35,28 @@ namespace bot
                     ",
                     parseMode: ParseMode.Markdown,
                     replyMarkup: MessageBuilder.MenuShow(_language));
-                    }
-                    else{
-                         await client.SendTextMessageAsync(
-                    chatId: message.Chat.Id,
-                    text: "In order to get Namaz times please share your Location...",
+        }
+        public static async void TimesWriterTomorrow(ITelegramBotClient client, Message message, string _language, IStorageService _storage, ICacheService _cache)
+        {
+            var res = await _storage.GetUserAsync(message.Chat.Id);
+            var result = await _cache.GetOrUpdatePrayerTimeAsyncTomorrow(res.ChatId, res.Longitude, res.Latitude);
+            var times = result.prayerTime; 
+                await client.SendTextMessageAsync(
+                chatId: message.Chat.Id,
+                text: @$"
+                {AladhanClient.GetDateTomorrow(res.Longitude, res.Latitude)}
+*Fajr*: {times.Fajr}
+*Sunrise*: {times.Sunrise}
+*Dhuhr*: {times.Dhuhr}
+*Asr*: {times.Asr}
+*Maghrib*: {times.Maghrib}
+*Isha*: {times.Isha}
+*Midnight*: {times.Midnight}
+                    
+*Method*: {times.CalculationMethod}
+                    ",
                     parseMode: ParseMode.Markdown,
-                    replyMarkup: MessageBuilder.LocationRequestButton(_language));
-                    }
-            }
+                    replyMarkup: MessageBuilder.MenuShow(_language));
         }
     }
 }

@@ -15,7 +15,8 @@ namespace bot
     public partial class Handlers
     {
         private static int lan;
-        private string temp, _language;
+        private string temp;
+        private string _language;
         private async Task BotOnMessageReceived(ITelegramBotClient client, Message message)
         {
             Console.WriteLine($"@{message.From.Username} : {message.From.FirstName} {message.From.LastName}");
@@ -35,11 +36,14 @@ namespace bot
                 lan=Languages.CheckLanguage(_language);
 
                 if((message.Text == "English" || message.Text == "O'zbekcha" || message.Text == "Русский") && temp == "/start")
+                {
                     await client.SendTextMessageAsync(
                     chatId: message.Chat.Id,
                     text: Helpers.Welcome(message.Text),
                     parseMode: ParseMode.Markdown,
                     replyMarkup: MessageBuilder.LocationRequestButton(message.Text));
+                    await ElseIf.NullLocation( client,  message,  message.Text,  _storage, _cache,_logger);
+                }
                 
                 else if((message.Text=="English" || message.Text=="O'zbekcha" || message.Text=="Русский"))
                 {
@@ -87,14 +91,14 @@ namespace bot
                     replyMarkup: MessageBuilder.LanguageRequestButton());
             
                 else if(message.Text==Languages.Language[lan,1])
+                {
                     Function.TimesWriter(client,message, _language, _storage, _cache);
+                }
                 
                 else if(message.Text==Languages.Language[lan,2])
-                    await client.SendTextMessageAsync(
-                    chatId: message.Chat.Id,
-                    text: "Ertaga nima bo'lishini hech kim bilmidi...",
-                    parseMode: ParseMode.Markdown,
-                    replyMarkup: MessageBuilder.MenuShow(_language));
+                {
+                    Function.TimesWriterTomorrow(client,message, _language, _storage, _cache);
+                }
                 
                 else
                     await client.SendTextMessageAsync(

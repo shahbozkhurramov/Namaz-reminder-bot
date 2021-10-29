@@ -7,5 +7,6 @@ namespace bot.HttpClients
     public interface IPrayerTimeClient
     {
         Task<(bool IsSuccess, PrayerTime prayerTime, Exception exception)> GetPrayerTimeAsync(double longitude, double latitude);
+        Task<(bool IsSuccess, PrayerTime prayerTime, Exception exception)> GetPrayerTimeAsyncTomorrow(double longitude, double latitude);
     }
 }

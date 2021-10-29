@@ -36,5 +36,29 @@ namespace bot.HttpClients
 
             return (false, null, new Exception(httpResponse.ReasonPhrase));
         }
+        public static string GetDateToday(double lon, double lat)
+        {
+            return DateTimeOffset.UtcNow.ToString("MM/dd/yyyy");
+        }
+        public static string GetDateTomorrow(double lon, double lat)
+        {
+            return DateTimeOffset.Now.AddDays(1).ToString("MM/dd/yyyy");
+        }
+
+        public async Task<(bool IsSuccess, PrayerTime prayerTime, Exception exception)> GetPrayerTimeAsyncTomorrow(double lon, double lat)
+        {
+            var query = $"/timings/{DateTimeOffset.Now.AddDays(1).ToUnixTimeSeconds()}?longitude={lon}&latitude={lat}&method=14&school=1";
+            using var httpResponse = await _client.GetAsync(query);
+            
+            if(httpResponse.IsSuccessStatusCode)
+            {
+                var jsonString = await httpResponse.Content.ReadAsStringAsync();
+                var dto = JsonSerializer.Deserialize<PrayerTimeDto>(jsonString);
+                
+                return (true, dto.ToPrayerTimeModel(), null);
+            }
+
+            return (false, null, new Exception(httpResponse.ReasonPhrase));
+        }
     }
 }

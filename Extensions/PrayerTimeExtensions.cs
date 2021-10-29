@@ -1,5 +1,5 @@
 using bot.Models;
-
+using System;
 namespace bot.Extensions
 {
     public static class PrayerTimeExtensions
