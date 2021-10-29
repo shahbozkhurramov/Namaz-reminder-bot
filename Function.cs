@@ -39,7 +39,7 @@ namespace bot
         public static async void TimesWriterTomorrow(ITelegramBotClient client, Message message, string _language, IStorageService _storage, ICacheService _cache)
         {
             var res = await _storage.GetUserAsync(message.Chat.Id);
-            var result = await _cache.GetOrUpdatePrayerTimeAsyncTomorrow(res.ChatId, res.Longitude, res.Latitude);
+            var result = await _cache.GetOrUpdatePrayerTimeAsyncTomorrow(res.ChatId, res.Longitude, res.Latitude, DateTimeOffset.Now.AddDays(1).ToUnixTimeSeconds());
             var times = result.prayerTime; 
                 await client.SendTextMessageAsync(
                 chatId: message.Chat.Id,

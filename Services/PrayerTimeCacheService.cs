@@ -34,9 +34,9 @@ namespace bot.Services
                 return result;
             });
         }
-        public async Task<(bool IsSuccess, PrayerTime prayerTime, Exception exception)> GetOrUpdatePrayerTimeAsyncTomorrow(long chatId, double longitude, double latitude)
+        public async Task<(bool IsSuccess, PrayerTime prayerTime, Exception exception)> GetOrUpdatePrayerTimeAsyncTomorrow(long chatId, double longitude, double latitude, long time)
         {
-            var key = string.Format($"{chatId}:{longitude}:{latitude}");
+            var key = string.Format($"{chatId}:{longitude}:{latitude}:{time}");
 
             return await _memCache.GetOrCreateAsync(key, async entry => 
             {   
